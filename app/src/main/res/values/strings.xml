@@ -1283,6 +1283,9 @@ If there are no signs along the whole street which apply for the highlighted sec
     <string name="quest_powerPolesMaterial_wood">Wood</string>
     <string name="quest_powerPolesMaterial_metal">Steel</string>
     <string name="quest_powerPolesMaterial_concrete">Concrete</string>
+    <string name="quest_powerPolesMaterial_terminal">Connected to a transformer building</string>
+    <string name="quest_powerPolesMaterial_terminal_dialog_title">Is this building already on the map?</string>
+    <string name="quest_powerPolesMaterial_terminal_dialog_description">If the transformer building is missing here, please consider leaving a note instead.</string>
 
     <string name="quest_railway_crossing_barrier_title2">What barriers are used at this railway crossing?</string>
     <string name="quest_railway_crossing_barrier_none2">No barriers</string>
