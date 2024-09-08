@@ -3,6 +3,7 @@ package de.westnordost.streetcomplete.quests.smoothness
 import de.westnordost.streetcomplete.osm.Tags
 import de.westnordost.streetcomplete.osm.changeToSteps
 import de.westnordost.streetcomplete.osm.removeCheckDatesForKey
+import de.westnordost.streetcomplete.osm.smoothness.Smoothness
 import de.westnordost.streetcomplete.osm.updateWithCheckDate
 
 sealed interface SmoothnessAnswer
