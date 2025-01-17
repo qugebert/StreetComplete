@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import de.westnordost.countryboundaries.CountryBoundaries
 import de.westnordost.osmfeatures.FeatureDictionary
+import de.westnordost.streetcomplete.ApplicationConstants.ELEMENT_TAG_KEY
+import de.westnordost.streetcomplete.ApplicationConstants.QUESTTYPE_TAG_KEY
 import de.westnordost.streetcomplete.R
 import de.westnordost.streetcomplete.data.location.RecentLocationStore
 import de.westnordost.streetcomplete.data.meta.CountryInfo
@@ -149,7 +151,7 @@ abstract class AbstractOverlayForm :
         fun onEdited(editType: ElementEditType, geometry: ElementGeometry)
 
         /** Called when the user chose to leave a note instead */
-        fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String)
+        fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String, leaveNoteTags: Map<String,String>)
 
         /** Called when the user chose to split the way */
         fun onSplitWay(editType: ElementEditType, way: Way, geometry: ElementPolylinesGeometry)
@@ -421,7 +423,11 @@ abstract class AbstractOverlayForm :
         } else {
             "In context of overlay \"$overlayTitle\" – $hintLabel"
         }
-        listener?.onComposeNote(overlay, element, geometry, leaveNoteContext)
+        val noteTags = mutableMapOf<String,String>()
+        noteTags[QUESTTYPE_TAG_KEY] = overlay.name;
+        noteTags[ELEMENT_TAG_KEY] = element.type.toString().lowercase() + "/" + element.id.toString();
+
+        listener?.onComposeNote(overlay, element, geometry, leaveNoteContext, noteTags)
     }
 
     /* -------------------------------------- Apply edit  -------------------------------------- */

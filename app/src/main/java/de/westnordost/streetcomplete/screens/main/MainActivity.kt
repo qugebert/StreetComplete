@@ -420,9 +420,9 @@ class MainActivity :
         closeBottomSheet()
     }
 
-    override fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String) {
+    override fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String, leaveNoteTags: Map<String,String>) {
         showInBottomSheet(
-            LeaveNoteInsteadFragment.create(element.type, element.id, leaveNoteContext, geometry.center),
+            LeaveNoteInsteadFragment.create(element.type, element.id, leaveNoteContext, leaveNoteTags, geometry.center),
             false
         )
     }

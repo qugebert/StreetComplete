@@ -23,6 +23,9 @@ data class NoteEdit(
     /** note comment text */
     val text: String?,
 
+    /** Note Tags */
+    val tags: Map<String,String>,
+
     /** attached photos */
     val imagePaths: List<String>,
 

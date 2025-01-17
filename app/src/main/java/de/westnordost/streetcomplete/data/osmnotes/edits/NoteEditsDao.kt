@@ -12,12 +12,11 @@ import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.LATITUDE
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.LONGITUDE
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.NOTE_ID
+import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.TAGS
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.TEXT
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.TRACK
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.Columns.TYPE
 import de.westnordost.streetcomplete.data.osmnotes.edits.NoteEditsTable.NAME
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class NoteEditsDao(private val db: Database) {
@@ -127,6 +126,7 @@ class NoteEditsDao(private val db: Database) {
         CREATED_TIMESTAMP to createdTimestamp,
         IS_SYNCED to if (isSynced) 1 else 0,
         TEXT to text,
+        TAGS to Json.encodeToString(tags),
         IMAGE_PATHS to Json.encodeToString(imagePaths),
         IMAGES_NEED_ACTIVATION to if (imagesNeedActivation) 1 else 0,
         TRACK to Json.encodeToString(track),
@@ -139,6 +139,7 @@ class NoteEditsDao(private val db: Database) {
         LatLon(getDouble(LATITUDE), getDouble(LONGITUDE)),
         NoteEditAction.valueOf(getString(TYPE)),
         getStringOrNull(TEXT),
+        Json.decodeFromString(getString(TAGS)),
         Json.decodeFromString(getString(IMAGE_PATHS)),
         getLong(CREATED_TIMESTAMP),
         getInt(IS_SYNCED) == 1,

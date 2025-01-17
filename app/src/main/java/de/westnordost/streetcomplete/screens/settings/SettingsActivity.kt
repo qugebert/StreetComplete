@@ -100,6 +100,7 @@ class SettingsActivity : BaseActivity(), AbstractOsmQuestForm.Listener {
         element: Element,
         geometry: ElementGeometry,
         leaveNoteContext: String,
+        leaveNoteTags: Map<String,String>,
     ) {
         message("Composing note")
         popQuestForm()

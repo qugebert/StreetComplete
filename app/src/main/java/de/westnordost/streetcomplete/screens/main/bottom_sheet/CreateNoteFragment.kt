@@ -153,11 +153,12 @@ class CreateNoteFragment : AbstractCreateNoteFragment() {
         binding.markerCreateLayout.markerLayoutContainer.visibility = View.INVISIBLE
 
         val fullText = "$text\n\nvia ${ApplicationConstants.USER_AGENT}"
+        val tags = mutableMapOf<String,String>()
         viewLifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val recordedTrack =
                     if (hasGpxAttached) listener?.getRecordedTrack().orEmpty() else emptyList()
-                noteEditsController.add(0, NoteEditAction.CREATE, position, fullText, imagePaths, recordedTrack)
+                noteEditsController.add(0, NoteEditAction.CREATE, position, fullText, tags, imagePaths, recordedTrack)
             }
         }
 

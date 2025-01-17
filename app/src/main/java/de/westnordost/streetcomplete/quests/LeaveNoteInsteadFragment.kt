@@ -20,8 +20,6 @@ import de.westnordost.streetcomplete.util.viewBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.android.inject
 
@@ -52,6 +50,7 @@ class LeaveNoteInsteadFragment : AbstractCreateNoteFragment() {
     private val listener: Listener? get() = parentFragment as? Listener ?: activity as? Listener
 
     private var leaveNoteContext: String? = null
+    private var leaveNoteTags: Map<String,String> = mutableMapOf<String,String>()
     private lateinit var position: LatLon
     private lateinit var elementType: ElementType
     private var elementId: Long = 0L
@@ -60,6 +59,7 @@ class LeaveNoteInsteadFragment : AbstractCreateNoteFragment() {
         super.onCreate(inState)
         val args = requireArguments()
         leaveNoteContext = args.getString(ARG_LEAVE_NOTE_CONTEXT)
+        leaveNoteTags = Json.decodeFromString(args.getString(ARG_LEAVE_NOTE_TAGS)!!)
         elementType = ElementType.valueOf(args.getString(ARG_ELEMENT_TYPE)!!)
         elementId = args.getLong(ARG_ELEMENT_ID)
         position = Json.decodeFromString(args.getString(ARG_POSITION)!!)
@@ -91,7 +91,7 @@ class LeaveNoteInsteadFragment : AbstractCreateNoteFragment() {
 
         viewLifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                noteEditsController.add(0, NoteEditAction.CREATE, position, fullText.joinToString(" "), imagePaths)
+                noteEditsController.add(0, NoteEditAction.CREATE, position, fullText.joinToString(" "), leaveNoteTags, imagePaths)
             }
             listener?.onCreatedNote(position)
         }
@@ -99,16 +99,18 @@ class LeaveNoteInsteadFragment : AbstractCreateNoteFragment() {
 
     companion object {
         private const val ARG_LEAVE_NOTE_CONTEXT = "questTitle"
+        private const val ARG_LEAVE_NOTE_TAGS = "noteTags"
         private const val ARG_ELEMENT_TYPE = "elementType"
         private const val ARG_ELEMENT_ID = "elementId"
         private const val ARG_POSITION = "position"
 
-        fun create(elementType: ElementType, elementId: Long, leaveNoteContext: String?, position: LatLon): LeaveNoteInsteadFragment {
+        fun create(elementType: ElementType, elementId: Long, leaveNoteContext: String?, leaveNoteTags: Map<String,String>, position: LatLon): LeaveNoteInsteadFragment {
             val f = LeaveNoteInsteadFragment()
             f.arguments = bundleOf(
                 ARG_ELEMENT_TYPE to elementType.name,
                 ARG_ELEMENT_ID to elementId,
                 ARG_LEAVE_NOTE_CONTEXT to leaveNoteContext,
+                ARG_LEAVE_NOTE_TAGS to Json.encodeToString(leaveNoteTags),
                 ARG_POSITION to Json.encodeToString(position)
             )
             return f

@@ -21,6 +21,7 @@ class NoteEditsController(
         action: NoteEditAction,
         position: LatLon,
         text: String? = null,
+        tags: Map<String,String> = emptyMap<String,String>(),
         imagePaths: List<String> = emptyList(),
         track: List<Trackpoint> = emptyList(),
     ) {
@@ -30,6 +31,7 @@ class NoteEditsController(
             position,
             action,
             text,
+            tags,
             imagePaths,
             nowAsEpochMilliseconds(),
             false,

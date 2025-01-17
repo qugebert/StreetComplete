@@ -12,6 +12,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.children
 import de.westnordost.osmfeatures.FeatureDictionary
+import de.westnordost.streetcomplete.ApplicationConstants.ELEMENT_TAG_KEY
+import de.westnordost.streetcomplete.ApplicationConstants.QUESTTYPE_TAG_KEY
 import de.westnordost.streetcomplete.R
 import de.westnordost.streetcomplete.data.location.RecentLocationStore
 import de.westnordost.streetcomplete.data.osm.edits.AddElementEditsController
@@ -94,7 +96,7 @@ abstract class AbstractOsmQuestForm<T> : AbstractQuestForm(), IsShowingQuestDeta
         fun onEdited(editType: ElementEditType, geometry: ElementGeometry)
 
         /** Called when the user chose to leave a note instead */
-        fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String)
+        fun onComposeNote(editType: ElementEditType, element: Element, geometry: ElementGeometry, leaveNoteContext: String, leaveNoteTags: Map<String,String>)
 
         /** Called when the user chose to split the way */
         fun onSplitWay(editType: ElementEditType, way: Way, geometry: ElementPolylinesGeometry)
@@ -243,7 +245,11 @@ abstract class AbstractOsmQuestForm<T> : AbstractQuestForm(), IsShowingQuestDeta
         } else {
             "Unable to answer \"$questTitle\" – $hintLabel"
         }
-        listener?.onComposeNote(osmElementQuestType, element, geometry, leaveNoteContext)
+        val noteTags = mutableMapOf<String,String>()
+        noteTags[QUESTTYPE_TAG_KEY] =osmElementQuestType.name;
+        noteTags[ELEMENT_TAG_KEY] = element.type.toString().lowercase() + "/" + element.id.toString();
+
+        listener?.onComposeNote(osmElementQuestType, element, geometry, leaveNoteContext, noteTags)
     }
 
     protected fun hideQuest() {

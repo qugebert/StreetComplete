@@ -12,6 +12,7 @@ object NoteEditsTable {
         const val IS_SYNCED = "synced"
         const val TYPE = "type"
         const val TEXT = "text"
+        const val TAGS = "tags"
         const val IMAGE_PATHS = "image_paths"
         const val IMAGES_NEED_ACTIVATION = "images_need_activation"
         const val TRACK = "track"
@@ -26,6 +27,7 @@ object NoteEditsTable {
             ${Columns.CREATED_TIMESTAMP} int NOT NULL,
             ${Columns.IS_SYNCED} int NOT NULL,
             ${Columns.TEXT} text,
+            ${Columns.TAGS} text NOT NULL,
             ${Columns.IMAGE_PATHS} text NOT NULL,
             ${Columns.IMAGES_NEED_ACTIVATION} int NOT NULL,
             ${Columns.TRACK} text NOT NULL,

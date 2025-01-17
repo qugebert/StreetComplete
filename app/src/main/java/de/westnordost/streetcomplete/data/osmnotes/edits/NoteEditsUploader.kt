@@ -1,5 +1,6 @@
 package de.westnordost.streetcomplete.data.osmnotes.edits
 
+import de.westnordost.streetcomplete.ApplicationConstants.USER_AGENT
 import de.westnordost.streetcomplete.data.ConflictException
 import de.westnordost.streetcomplete.data.osmnotes.NoteController
 import de.westnordost.streetcomplete.data.osmnotes.NotesApiClient
@@ -20,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class NoteEditsUploader(
     private val noteEditsController: NoteEditsController,
@@ -67,16 +69,28 @@ class NoteEditsUploader(
         }
     }
 
+    private fun createNoteTags(edit: NoteEdit?): Map<String,String> {
+        val tags = mutableMapOf(
+            "created_by" to USER_AGENT,
+            "locale" to Locale.getDefault().toLanguageTag()
+        )
+        edit?.tags?.forEach { (key, value) -> tags[key] = value }
+        return tags
+    }
+
+
+
     private suspend fun uploadEdit(edit: NoteEdit) {
         // try to upload the image and track if we have them
         val imageText = uploadAndGetAttachedPhotosText(edit.imagePaths)
         val trackText = uploadAndGetAttachedTrackText(edit.track, edit.text)
         val text = edit.text.orEmpty() + imageText + trackText
+        val tags=createNoteTags(edit)
 
         // done, try to upload the note to OSM
         try {
             val note = when (edit.action) {
-                CREATE -> notesApi.create(edit.position, text)
+                CREATE -> notesApi.create(edit.position, text, tags)
                 COMMENT -> notesApi.comment(edit.noteId, text)
             }
 

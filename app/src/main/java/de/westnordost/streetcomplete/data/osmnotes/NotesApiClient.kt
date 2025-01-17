@@ -19,6 +19,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.json.Json
 
 /**
  * Creates, comments, closes, reopens and search for notes.
@@ -41,12 +42,13 @@ class NotesApiClient(
      *
      * @return the new note
      */
-    suspend fun create(pos: LatLon, text: String): Note = wrapApiClientExceptions {
+    suspend fun create(pos: LatLon, text: String, tags: Map<String, String>): Note = wrapApiClientExceptions {
         val response = httpClient.post(baseUrl + "notes") {
             userLoginSource.accessToken?.let { bearerAuth(it) }
             parameter("lat", pos.latitude.format(7))
             parameter("lon", pos.longitude.format(7))
             parameter("text", text)
+            parameter("tags", Json.encodeToString(tags))
             expectSuccess = true
         }
         return notesApiParser.parseNotes(response.body<String>()).single()
