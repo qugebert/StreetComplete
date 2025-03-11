@@ -13,6 +13,7 @@ import de.westnordost.streetcomplete.osm.smoothness.Smoothness.IMPASSABLE
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.INTERMEDIATE
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.VERY_BAD
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.VERY_HORRIBLE
+import de.westnordost.streetcomplete.osm.smoothness.Smoothness.UNKNOWN
 import de.westnordost.streetcomplete.util.ktx.asImageSpan
 import de.westnordost.streetcomplete.view.CharSequenceText
 import de.westnordost.streetcomplete.view.ResImage
@@ -58,6 +59,7 @@ val Smoothness.icon @DrawableRes get(): Int = when (this) {
     HORRIBLE ->      R.drawable.ic_smoothness_pickup_truck
     VERY_HORRIBLE -> R.drawable.ic_smoothness_tractor
     IMPASSABLE ->    R.drawable.ic_smoothness_pedestrian
+    UNKNOWN ->       R.drawable.space_128dp
 }
 
 val Smoothness.titleResId get() = when (this) {
@@ -69,6 +71,7 @@ val Smoothness.titleResId get() = when (this) {
     HORRIBLE -> R.string.quest_smoothness_title_horrible
     VERY_HORRIBLE -> R.string.quest_smoothness_title_very_horrible
     IMPASSABLE -> R.string.quest_smoothness_title_impassable
+    UNKNOWN -> R.string.quest_smoothness_title_unknown
 }
 
 fun Smoothness.getDescriptionResId(surface: String): Int? = when (surface) {

@@ -20,6 +20,7 @@ fun SmoothnessAnswer.applyTo(tags: Tags) {
     tags.remove("surface:grade")
     when (this) {
         is SmoothnessValueAnswer -> {
+            if (value.osmValue != null)
             tags.updateWithCheckDate("smoothness", value.osmValue)
         }
         is WrongSurfaceAnswer -> {

@@ -1506,6 +1506,7 @@ If there are no signs along the whole street which apply for the highlighted sec
     <string name="quest_smoothness_title_horrible">Very bumpy and uneven</string>
     <string name="quest_smoothness_title_very_horrible">Almost impassable</string>
     <string name="quest_smoothness_title_impassable">Impassable</string>
+    <string name="quest_smoothness_title_unknown">Unknown smoothness</string>
     <string name="quest_smoothness_description_excellent_paved">No bumps or cracks</string>
     <string name="quest_smoothness_description_excellent_paving_stones">Almost seamless</string>
     <string name="quest_smoothness_description_good_paved">Only small cracks, gaps, repairs or a little rough surface</string>
