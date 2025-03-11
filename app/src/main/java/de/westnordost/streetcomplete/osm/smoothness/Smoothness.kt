@@ -2,7 +2,7 @@ package de.westnordost.streetcomplete.osm.smoothness
 
 data class SmoothnessAndNote(val smoothness: Smoothness?, val note: String? = null)
 
-enum class Smoothness(val osmValue: String) {
+enum class Smoothness(val osmValue: String?) {
     EXCELLENT("excellent"),
     GOOD("good"),
     INTERMEDIATE("intermediate"),
@@ -11,4 +11,5 @@ enum class Smoothness(val osmValue: String) {
     HORRIBLE("horrible"),
     VERY_HORRIBLE("very_horrible"),
     IMPASSABLE("impassable"),
+    UNKNOWN(null),
 }
