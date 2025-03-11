@@ -13,3 +13,12 @@ enum class Smoothness(val osmValue: String?) {
     IMPASSABLE("impassable"),
     UNKNOWN(null),
 }
+
+fun parseSmoothness(smoothness: String?) : Smoothness {
+    if (smoothness == null) return Smoothness.UNKNOWN
+    val parsedSmoothness = Smoothness.entries.find { it.osmValue == smoothness }
+    return if (parsedSmoothness is Smoothness)
+        parsedSmoothness
+    else
+        Smoothness.UNKNOWN
+}

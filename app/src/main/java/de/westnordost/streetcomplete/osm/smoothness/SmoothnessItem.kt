@@ -19,6 +19,7 @@ import de.westnordost.streetcomplete.view.CharSequenceText
 import de.westnordost.streetcomplete.view.ResImage
 import de.westnordost.streetcomplete.view.ResText
 import de.westnordost.streetcomplete.view.image_select.DisplayItem
+import de.westnordost.streetcomplete.view.image_select.Item
 import de.westnordost.streetcomplete.view.image_select.Item2
 
 fun Iterable<Smoothness>.toItems(context: Context, surface: String) =
@@ -188,3 +189,6 @@ private val Smoothness.compactedOrGravelDescriptionResId get() = when (this) {
     VERY_BAD -> R.string.quest_smoothness_description_very_bad_compacted_gravel
     else -> null
 }
+
+fun Smoothness.asItem(): DisplayItem<Smoothness> =
+    Item(this, icon, titleResId)

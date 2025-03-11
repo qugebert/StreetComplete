@@ -14,6 +14,7 @@ import de.westnordost.streetcomplete.overlays.buildings.BuildingsOverlay
 import de.westnordost.streetcomplete.overlays.cycleway.CyclewayOverlay
 import de.westnordost.streetcomplete.overlays.places.PlacesOverlay
 import de.westnordost.streetcomplete.overlays.sidewalk.SidewalkOverlay
+import de.westnordost.streetcomplete.overlays.smoothness.SmoothnessOverlay
 import de.westnordost.streetcomplete.overlays.street_parking.StreetParkingOverlay
 import de.westnordost.streetcomplete.overlays.surface.SurfaceOverlay
 import de.westnordost.streetcomplete.overlays.things.ThingsOverlay
@@ -52,6 +53,7 @@ fun overlaysRegistry(
 
     0 to WayLitOverlay(),
     6 to SurfaceOverlay(),
+    9 to SmoothnessOverlay(),
     1 to SidewalkOverlay(),
     5 to CyclewayOverlay(getCountryInfoByLocation),
     2 to StreetParkingOverlay(),
