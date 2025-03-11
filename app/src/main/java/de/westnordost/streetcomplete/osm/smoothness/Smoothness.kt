@@ -1,4 +1,6 @@
-package de.westnordost.streetcomplete.quests.smoothness
+package de.westnordost.streetcomplete.osm.smoothness
+
+data class SmoothnessAndNote(val smoothness: Smoothness?, val note: String? = null)
 
 enum class Smoothness(val osmValue: String) {
     EXCELLENT("excellent"),
