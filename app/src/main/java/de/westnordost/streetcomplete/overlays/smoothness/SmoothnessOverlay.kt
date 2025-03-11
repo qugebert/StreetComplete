@@ -24,7 +24,7 @@ class SmoothnessOverlay : Overlay {
 
     override val changesetComment = "Specify smoothness"
     override val icon = R.drawable.ic_quest_street_surface_detail
-    override val title = R.string.quest_smoothness_road_title
+    override val title = R.string.overlay_smoothness
     override val wikiLink: String = "Key:smoothness"
     override val achievements = listOf(CAR, BICYCLIST, WHEELCHAIR)
     override val hidesQuestTypes = setOf(
