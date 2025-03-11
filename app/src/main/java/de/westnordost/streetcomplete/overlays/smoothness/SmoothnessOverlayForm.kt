@@ -40,7 +40,7 @@ class SmoothnessOverlayForm() : AImageSelectOverlayForm<Smoothness>()  {
         applyEdit(UpdateElementTagsAction(element!!, tagChanges.create()))
     }
 
-    override val items = Smoothness.entries.map { it.asItem() }
+    override val items = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
     override val selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
 
 
