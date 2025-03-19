@@ -41,7 +41,7 @@ class SmoothnessOverlay : Overlay {
                 highway ~ ${(ROADS_TO_ASK_SMOOTHNESS_FOR + ALL_PATHS_EXCEPT_STEPS).joinToString("|")}
                 or highway = service and service !~ driveway|slipway
                 )
-            and surface ~ ${(SURFACES_FOR_SMOOTHNESS).joinToString("|")}
+            and ~surface|footway:surface|cycleway:surface ~ ${(SURFACES_FOR_SMOOTHNESS).joinToString("|")}
         """).map { it to getStyle(it) }
 
     private fun getStyle(element: Element): Style {
