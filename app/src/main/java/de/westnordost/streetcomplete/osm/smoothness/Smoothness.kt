@@ -4,8 +4,6 @@ import de.westnordost.streetcomplete.osm.Tags
 import de.westnordost.streetcomplete.osm.getLastCheckDateKeys
 import de.westnordost.streetcomplete.osm.updateWithCheckDate
 
-data class SmoothnessAndNote(val smoothness: Smoothness?, val note: String? = null)
-
 enum class Smoothness(val osmValue: String?) {
     EXCELLENT("excellent"),
     GOOD("good"),
