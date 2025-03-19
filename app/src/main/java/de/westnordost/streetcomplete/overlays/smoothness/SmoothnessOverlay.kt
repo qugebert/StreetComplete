@@ -8,7 +8,6 @@ import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.
 import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.CAR
 import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.WHEELCHAIR
 import de.westnordost.streetcomplete.osm.ALL_PATHS
-import de.westnordost.streetcomplete.osm.ALL_ROADS
 import de.westnordost.streetcomplete.osm.smoothness.ALL_PATHS_EXCEPT_STEPS
 import de.westnordost.streetcomplete.osm.smoothness.ROADS_TO_ASK_SMOOTHNESS_FOR
 import de.westnordost.streetcomplete.osm.smoothness.SURFACES_FOR_SMOOTHNESS
@@ -36,16 +35,15 @@ class SmoothnessOverlay : Overlay {
         AddPathSmoothness::class.simpleName!!,
     )
 
-    /* Von surface-overlay übernommen.
-    * TODO: Elementauswahl überdenken */
     override fun getStyledElements(mapData: MapDataWithGeometry) =
         mapData.filter("""
-            ways, relations with
+            ways, relations with (
                 highway ~ ${(ROADS_TO_ASK_SMOOTHNESS_FOR + ALL_PATHS_EXCEPT_STEPS).joinToString("|")}
+                or highway = service and service !~ driveway|slipway
+                )
             and surface ~ ${(SURFACES_FOR_SMOOTHNESS).joinToString("|")}
         """).map { it to getStyle(it) }
 
-// TODO: Von Surface-Overlay übernommen. Nochmal drüber nachdenken.
     private fun getStyle(element: Element): Style {
         val tags = element.tags
         val isArea = tags["area"] == "yes"
