@@ -35,7 +35,6 @@ class SmoothnessOverlay : Overlay {
         AddRoadSmoothness::class.simpleName!!,
         AddPathSmoothness::class.simpleName!!,
     )
-    //TODO: Muss das auch noch im AchievementsModule als Alias gelistet werden?
 
     /* Von surface-overlay übernommen.
     * TODO: Elementauswahl überdenken */
