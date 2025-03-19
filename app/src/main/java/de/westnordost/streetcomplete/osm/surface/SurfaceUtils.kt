@@ -2,6 +2,7 @@ package de.westnordost.streetcomplete.osm.surface
 
 import de.westnordost.streetcomplete.osm.Tags
 import de.westnordost.streetcomplete.osm.getLastCheckDateKeys
+import de.westnordost.streetcomplete.osm.smoothness.getKeysAssociatedWithSmoothness
 
 val INVALID_SURFACES = setOf(
     "cobblestone", // https://wiki.openstreetmap.org/wiki/Tag%3Asurface%3Dcobblestone
@@ -82,13 +83,10 @@ fun getKeysAssociatedWithSurface(prefix: String = ""): Set<String> =
         "${prefix}surface:grade",
         "${prefix}surface:colour",
         "source:${prefix}surface",
-        "${prefix}smoothness",
-        "${prefix}smoothness:date",
-        "source:${prefix}smoothness",
         "${prefix}paving_stones:shape",
         "${prefix}paving_stones:pattern",
         "${prefix}paving_stones:length",
         "${prefix}paving_stones:width",
     ) +
-        getLastCheckDateKeys("${prefix}surface") +
-        getLastCheckDateKeys("${prefix}smoothness")
+        getKeysAssociatedWithSmoothness(prefix) +
+        getLastCheckDateKeys("${prefix}surface")

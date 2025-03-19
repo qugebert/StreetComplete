@@ -6,6 +6,8 @@ import de.westnordost.streetcomplete.data.osm.osmquests.OsmFilterQuestType
 import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.BICYCLIST
 import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.WHEELCHAIR
 import de.westnordost.streetcomplete.osm.Tags
+import de.westnordost.streetcomplete.osm.smoothness.ALL_PATHS_EXCEPT_STEPS
+import de.westnordost.streetcomplete.osm.smoothness.SURFACES_FOR_SMOOTHNESS
 
 class AddPathSmoothness : OsmFilterQuestType<SmoothnessAnswer>() {
 
@@ -40,5 +42,4 @@ class AddPathSmoothness : OsmFilterQuestType<SmoothnessAnswer>() {
     }
 }
 
-// smoothness is not asked for steps
-val ALL_PATHS_EXCEPT_STEPS = listOf("footway", "cycleway", "path", "bridleway")
+

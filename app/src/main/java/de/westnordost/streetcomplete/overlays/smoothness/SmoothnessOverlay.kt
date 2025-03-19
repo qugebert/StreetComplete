@@ -9,6 +9,9 @@ import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.
 import de.westnordost.streetcomplete.data.user.achievements.EditTypeAchievement.WHEELCHAIR
 import de.westnordost.streetcomplete.osm.ALL_PATHS
 import de.westnordost.streetcomplete.osm.ALL_ROADS
+import de.westnordost.streetcomplete.osm.smoothness.ALL_PATHS_EXCEPT_STEPS
+import de.westnordost.streetcomplete.osm.smoothness.ROADS_TO_ASK_SMOOTHNESS_FOR
+import de.westnordost.streetcomplete.osm.smoothness.SURFACES_FOR_SMOOTHNESS
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness
 import de.westnordost.streetcomplete.osm.smoothness.parseSmoothness
 import de.westnordost.streetcomplete.overlays.Color
@@ -17,6 +20,7 @@ import de.westnordost.streetcomplete.overlays.PolygonStyle
 import de.westnordost.streetcomplete.overlays.PolylineStyle
 import de.westnordost.streetcomplete.overlays.StrokeStyle
 import de.westnordost.streetcomplete.overlays.Style
+import de.westnordost.streetcomplete.overlays.surface.SmoothnessOverlayForm
 import de.westnordost.streetcomplete.quests.smoothness.AddPathSmoothness
 import de.westnordost.streetcomplete.quests.smoothness.AddRoadSmoothness
 
@@ -34,11 +38,12 @@ class SmoothnessOverlay : Overlay {
     //TODO: Muss das auch noch im AchievementsModule als Alias gelistet werden?
 
     /* Von surface-overlay übernommen.
-    * TODO: Gleiche Auswahl ok?? Nochmal nachsehen, was die beiden Smoothness-Quests abfragen */
+    * TODO: Elementauswahl überdenken */
     override fun getStyledElements(mapData: MapDataWithGeometry) =
         mapData.filter("""
             ways, relations with
-                highway ~ ${(ALL_PATHS + ALL_ROADS).joinToString("|")}
+                highway ~ ${(ROADS_TO_ASK_SMOOTHNESS_FOR + ALL_PATHS_EXCEPT_STEPS).joinToString("|")}
+            and surface ~ ${(SURFACES_FOR_SMOOTHNESS).joinToString("|")}
         """).map { it to getStyle(it) }
 
 // TODO: Von Surface-Overlay übernommen. Nochmal drüber nachdenken.

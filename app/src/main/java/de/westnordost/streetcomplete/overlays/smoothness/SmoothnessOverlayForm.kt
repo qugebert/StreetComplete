@@ -1,47 +1,290 @@
-package de.westnordost.streetcomplete.overlays.smoothness
+package de.westnordost.streetcomplete.overlays.surface
+
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import androidx.core.view.children
+import androidx.core.view.isGone
+import de.westnordost.streetcomplete.R
+import de.westnordost.streetcomplete.data.elementfilter.toElementFilterExpression
 import de.westnordost.streetcomplete.data.osm.edits.update_tags.StringMapChangesBuilder
 import de.westnordost.streetcomplete.data.osm.edits.update_tags.UpdateElementTagsAction
+import de.westnordost.streetcomplete.data.osm.mapdata.Element
 import de.westnordost.streetcomplete.data.preferences.Preferences
-import de.westnordost.streetcomplete.osm.smoothness.asItem
+import de.westnordost.streetcomplete.databinding.FragmentOverlaySurfaceSelectBinding
+import de.westnordost.streetcomplete.databinding.ViewImageSelectBinding
+import de.westnordost.streetcomplete.osm.ALL_PATHS
+import de.westnordost.streetcomplete.osm.changeToSteps
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness
+import de.westnordost.streetcomplete.osm.smoothness.applyTo
+import de.westnordost.streetcomplete.osm.smoothness.asItem
 import de.westnordost.streetcomplete.osm.smoothness.parseSmoothness
-import de.westnordost.streetcomplete.overlays.AImageSelectOverlayForm
+import de.westnordost.streetcomplete.osm.surface.Surface
+import de.westnordost.streetcomplete.osm.surface.parseSurface
+import de.westnordost.streetcomplete.overlays.AbstractOverlayForm
+import de.westnordost.streetcomplete.overlays.AnswerItem
+import de.westnordost.streetcomplete.overlays.IAnswerItem
+import de.westnordost.streetcomplete.util.getLanguagesForFeatureDictionary
+import de.westnordost.streetcomplete.util.ktx.couldBeSteps
 import de.westnordost.streetcomplete.util.ktx.valueOfOrNull
-import de.westnordost.streetcomplete.view.image_select.DisplayItem
+import de.westnordost.streetcomplete.view.image_select.ImageListPickerDialog
+import de.westnordost.streetcomplete.view.image_select.ItemViewHolder
+import de.westnordost.streetcomplete.view.setImage
 import org.koin.android.ext.android.inject
 
-class SmoothnessOverlayForm() : AImageSelectOverlayForm<Smoothness>()  {
+class SmoothnessOverlayForm : AbstractOverlayForm() {
+    override val contentLayoutResId = R.layout.fragment_overlay_surface_select
+    private val binding by contentViewBinding(FragmentOverlaySurfaceSelectBinding::bind)
+
+    private val prefs: Preferences by inject()
+
+    private val lastPickedSmoothness: Smoothness? get() =
+        prefs.getLastPicked(this::class.simpleName!!)
+            .map { valueOfOrNull<Smoothness>(it) }
+            .firstOrNull()
+
+    /* TODO: Benötigt für die Auswahl der richtigen Bilder? */
+    private var originalSurface: Surface? = null
+    private var originalFootwaySurface: Surface? = null
+    private var originalCyclewaySurface: Surface? = null
 
     private var originalSmoothness: Smoothness? = null
-    private val prefs: Preferences by inject()
-    override val itemsPerRow = 1
+    private var originalFootwaySmoothness: Smoothness? = null
+    private var originalCyclewaySmoothness: Smoothness? = null
 
-    override val lastPickedItem: DisplayItem<Smoothness>? get() =
-        prefs.getLastPicked(this::class.simpleName!!)
-            .map { valueOfOrNull<Smoothness>(it)?.asItem() }
-            .firstOrNull()
+    private var selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
+
+    private var selectedSmoothness: Smoothness? = null
+        set(value) {
+            field = value
+            updateSelectedCell(binding.main, value, originalSurface)
+        }
+    private var selectedFootwaySmoothness: Smoothness? = null
+        set(value) {
+            field = value
+            updateSelectedCell(binding.footway, value, originalFootwaySurface)
+        }
+    private var selectedCyclewaySmoothness: Smoothness? = null
+        set(value) {
+            field = value
+            updateSelectedCell(binding.cycleway, value, originalCyclewaySurface)
+        }
+
+    private val cellLayoutId: Int = R.layout.cell_labeled_image_select
+
+    private var isSegregatedLayout = false
+
+    override val otherAnswers: List<IAnswerItem> get() = listOfNotNull(
+        createSegregatedAnswer(),
+        createConvertToStepsAnswer()
+    )
+
+    private val isBothFootAndBicycleTrafficFilter by lazy { """
+        ways, relations with
+          highway = footway and bicycle ~ yes|designated
+          or highway = cycleway and foot ~ yes|designated
+          or highway = path and foot != no and bicycle != no
+    """.toElementFilterExpression() }
+
+    private fun isBothFootAndBicycleTraffic(element: Element): Boolean =
+        isBothFootAndBicycleTrafficFilter.matches(element)
+
+    private fun switchToFootwayCyclewaySurfaceLayout() {
+        isSegregatedLayout = true
+        binding.main.root.isGone = true
+        binding.cyclewaySurfaceContainer.isGone = false
+        binding.footwaySurfaceContainer.isGone = false
+        binding.lastPickedButton.isGone = true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val tags = element!!.tags
+        originalSmoothness = parseSmoothness(tags["smoothness"])
+        originalCyclewaySmoothness = parseSmoothness(tags["cycleway:smoothness"])
+        originalFootwaySmoothness = parseSmoothness(tags["footway:smoothness"])
+
+        originalSurface = parseSurface(tags["surface"])
+        originalCyclewaySurface = parseSurface(tags["cycleway:surface"])
+        originalFootwaySurface = parseSurface(tags["footway:surface"])
+
+        selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem(originalSurface) }
+    }
+
+    private fun updateSelectedCell(cellBinding: ViewImageSelectBinding, item: Smoothness?, surface: Surface?) {
+        cellBinding.selectTextView.isGone = item != null
+        cellBinding.selectedCellView.isGone = item == null
+        if (item != null) {
+            ItemViewHolder(cellBinding.selectedCellView).bind(item.asItem(surface))
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        originalSmoothness = parseSmoothness(element!!.tags["smoothness"])
-        selectedItem = originalSmoothness?.asItem()
+        LayoutInflater.from(requireContext()).inflate(cellLayoutId, binding.main.selectedCellView, true)
+        binding.main.selectedCellView.children.first().background = null
+        binding.main.selectButton.setOnClickListener {
+            ImageListPickerDialog(requireContext(), selectableItems, cellLayoutId) { item ->
+                if (item.value != selectedSmoothness) {
+                    selectedSmoothness = item.value
+                    checkIsFormComplete()
+                }
+            }.show()
+        }
+
+        LayoutInflater.from(requireContext()).inflate(cellLayoutId, binding.cycleway.selectedCellView, true)
+        binding.cycleway.selectedCellView.children.first().background = null
+        binding.cycleway.selectButton.setOnClickListener {
+            ImageListPickerDialog(requireContext(), selectableItems, cellLayoutId) { item ->
+                if (item.value != selectedCyclewaySmoothness) {
+                    selectedCyclewaySmoothness = item.value
+                    checkIsFormComplete()
+                }
+            }.show()
+        }
+
+        LayoutInflater.from(requireContext()).inflate(cellLayoutId, binding.footway.selectedCellView, true)
+        binding.footway.selectedCellView.children.first().background = null
+        binding.footway.selectButton.setOnClickListener {
+            ImageListPickerDialog(requireContext(), selectableItems, cellLayoutId) { item ->
+                if (item.value != selectedFootwaySmoothness) {
+                    selectedFootwaySmoothness = item.value
+                    checkIsFormComplete()
+                }
+            }.show()
+        }
+
+        if (savedInstanceState != null) {
+            onLoadInstanceState(savedInstanceState)
+        } else {
+            initStateFromTags()
+        }
+
+        binding.lastPickedButton.isGone = lastPickedSmoothness == null
+        binding.lastPickedButton.setImage(lastPickedSmoothness?.asItem(originalSurface)?.image)
+        binding.lastPickedButton.setOnClickListener {
+            selectedSmoothness = lastPickedSmoothness
+            binding.lastPickedButton.isGone = true
+            checkIsFormComplete()
+        }
+
+        val isSegregated = element!!.tags["segregated"] == "yes"
+        val isPath = element!!.tags["highway"] in ALL_PATHS
+        if (isPath && (isSegregated || originalCyclewaySmoothness != null || originalFootwaySmoothness != null)) {
+            switchToFootwayCyclewaySurfaceLayout()
+        }
+
+        val languages = getLanguagesForFeatureDictionary(resources.configuration)
+        binding.cyclewaySurfaceLabel.text =
+            featureDictionary.getById("highway/cycleway", languages)?.name
+        binding.footwaySurfaceLabel.text =
+            featureDictionary.getById("highway/footway", languages)?.name
+
+        checkIsFormComplete()
     }
 
-    override fun hasChanges(): Boolean = selectedItem?.value != originalSmoothness
+    private fun initStateFromTags() {
+        selectedSmoothness = originalSmoothness
+        selectedCyclewaySmoothness = originalCyclewaySmoothness
+        selectedFootwaySmoothness = originalFootwaySmoothness
+    }
+
+    /* ------------------------------------- instance state ------------------------------------- */
+
+    private fun onLoadInstanceState(inState: Bundle) {
+        selectedSmoothness = parseSmoothness(inState.getString(SMOOTHNESS))
+        selectedCyclewaySmoothness = parseSmoothness(inState.getString(CYCLEWAY_SMOOTHNESS))
+        selectedFootwaySmoothness = parseSmoothness(inState.getString(FOOTWAY_SMOOTHNESS))
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SMOOTHNESS, selectedSmoothness?.osmValue)
+        outState.putString(CYCLEWAY_SMOOTHNESS, selectedCyclewaySmoothness?.osmValue)
+        outState.putString(FOOTWAY_SMOOTHNESS, selectedFootwaySmoothness?.osmValue)
+    }
+
+    /* -------------------------------------- apply answer -------------------------------------- */
+
+    override fun isFormComplete(): Boolean =
+        if (isSegregatedLayout) {
+            selectedCyclewaySmoothness != null && selectedFootwaySmoothness != null
+        } else {
+            selectedSmoothness != null
+        }
+
+    override fun hasChanges(): Boolean =
+        selectedSmoothness != originalSmoothness ||
+            selectedCyclewaySmoothness != originalCyclewaySmoothness ||
+            selectedFootwaySmoothness != originalFootwaySmoothness
 
     override fun onClickOk() {
-        prefs.addLastPicked(this::class.simpleName!!, selectedItem!!.value!!.name)
+        val changesBuilder = StringMapChangesBuilder(element!!.tags)
+
+        if (isSegregatedLayout) {
+            changesBuilder["segregated"] = "yes"
+            selectedCyclewaySmoothness?.applyTo(changesBuilder, "cycleway")
+            selectedFootwaySmoothness?.applyTo(changesBuilder, "footway")
+        } else {
+            selectedSmoothness?.let { prefs.addLastPicked(this::class.simpleName!!, it.name) }
+            selectedSmoothness?.applyTo(changesBuilder)
+        }
+
+        applyEdit(UpdateElementTagsAction(element!!, changesBuilder.create()))
+    }
+
+    private fun createSegregatedAnswer(): AnswerItem? =
+        if (isSegregatedLayout) {
+            /*
+                No option to switch back to single surface. Removing info about separate cycleway is
+                too complicated.
+
+                Typically it requires editing not only surface info but also an access info as it
+                happens in cases where bicycle access is gone. May require also removal of
+                cycleway=separate, bicycle=use_sidepath from the road.
+
+                And in cases where there is a segregated cycleway with the same surface as footway
+                then StreetComplete will anyway ask for cycleway:surface and footway:surface.
+
+                Fortunately need for this change are really rare. Notes can be left as usual.
+             */
+            null
+        } else if (isBothFootAndBicycleTraffic(element!!)) {
+            /*
+                Only where bicycle access is already present because adding bicycle access typically
+                requires adding proper access tags, interconnections with roads and often also other
+                geometry changes.
+
+                In case where path is not clearly marked as carrying both foot and bicycle traffic
+                mapper can leave a note
+             */
+            AnswerItem(R.string.overlay_path_surface_segregated) {
+                // reset previous data
+                selectedSmoothness = originalSmoothness
+                switchToFootwayCyclewaySurfaceLayout()
+            }
+        } else {
+            null
+        }
+
+    private fun createConvertToStepsAnswer(): AnswerItem? =
+        if (element!!.couldBeSteps()) {
+            AnswerItem(R.string.quest_generic_answer_is_actually_steps) { changeToSteps() }
+        } else {
+            null
+        }
+
+    private fun changeToSteps() {
         val tagChanges = StringMapChangesBuilder(element!!.tags)
-        //TODO: HÄÄÄH???
-        tagChanges["smoothness"]=selectedItem!!.value?.osmValue.toString()
+        tagChanges.changeToSteps()
         applyEdit(UpdateElementTagsAction(element!!, tagChanges.create()))
     }
 
-    override val items = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
-    override val selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
-
-
+    companion object {
+        private const val SMOOTHNESS = "selected_smoothness"
+        private const val CYCLEWAY_SMOOTHNESS = "cycleway_smoothness"
+        private const val FOOTWAY_SMOOTHNESS = "footway_smoothness"
+    }
 }

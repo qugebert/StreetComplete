@@ -14,6 +14,7 @@ import de.westnordost.streetcomplete.osm.smoothness.Smoothness.INTERMEDIATE
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.VERY_BAD
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.VERY_HORRIBLE
 import de.westnordost.streetcomplete.osm.smoothness.Smoothness.UNKNOWN
+import de.westnordost.streetcomplete.osm.surface.Surface
 import de.westnordost.streetcomplete.util.ktx.asImageSpan
 import de.westnordost.streetcomplete.view.CharSequenceText
 import de.westnordost.streetcomplete.view.ResImage
@@ -90,7 +91,7 @@ private val Smoothness.descriptionResIdFallback: Int? get() = when (this) {
     else -> null
 }
 
-fun Smoothness.getImageResId(surface: String): Int? = when (surface) {
+fun Smoothness.getImageResId(surface: String?): Int? = when (surface) {
     "asphalt" -> asphaltImageResId
     "concrete", "concrete:plates" -> concreteImageResId
     "sett" -> settImageResId
@@ -189,6 +190,14 @@ private val Smoothness.compactedOrGravelDescriptionResId get() = when (this) {
     VERY_BAD -> R.string.quest_smoothness_description_very_bad_compacted_gravel
     else -> null
 }
+
+fun Smoothness.asItem(surface: Surface?): DisplayItem<Smoothness> {
+    return if (surface?.osmValue != null)
+        Item(this, getImageResId(surface.osmValue), titleResId)
+    else
+        Item(this, null, null)
+}
+
 
 fun Smoothness.asItem(): DisplayItem<Smoothness> =
     Item(this, icon, titleResId)
