@@ -191,11 +191,11 @@ private val Smoothness.compactedOrGravelDescriptionResId get() = when (this) {
     else -> null
 }
 
-fun Smoothness.asItem(surface: Surface?): DisplayItem<Smoothness> {
+fun Smoothness.asItem(surface: Surface?): DisplayItem<Smoothness>? {
     return if (surface?.osmValue != null)
         Item(this, getImageResId(surface.osmValue), titleResId)
     else
-        Item(this, null, null)
+        null
 }
 
 

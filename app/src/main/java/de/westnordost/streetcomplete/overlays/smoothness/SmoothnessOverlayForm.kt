@@ -27,6 +27,7 @@ import de.westnordost.streetcomplete.overlays.IAnswerItem
 import de.westnordost.streetcomplete.util.getLanguagesForFeatureDictionary
 import de.westnordost.streetcomplete.util.ktx.couldBeSteps
 import de.westnordost.streetcomplete.util.ktx.valueOfOrNull
+import de.westnordost.streetcomplete.util.logs.Log
 import de.westnordost.streetcomplete.view.image_select.ImageListPickerDialog
 import de.westnordost.streetcomplete.view.image_select.ItemViewHolder
 import de.westnordost.streetcomplete.view.setImage
@@ -43,7 +44,7 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
             .map { valueOfOrNull<Smoothness>(it) }
             .firstOrNull()
 
-    /* TODO: Benötigt für die Auswahl der richtigen Bilder? */
+
     private var originalSurface: Surface? = null
     private var originalFootwaySurface: Surface? = null
     private var originalCyclewaySurface: Surface? = null
@@ -52,7 +53,10 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
     private var originalFootwaySmoothness: Smoothness? = null
     private var originalCyclewaySmoothness: Smoothness? = null
 
+    //TODO: Woher kommt das leere Button welches zu 'horrible' auflöst?
     private var selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
+    private var selectableCyclewayItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
+    private var selectableFootwayItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem() }
 
     private var selectedSmoothness: Smoothness? = null
         set(value) {
@@ -109,14 +113,29 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
         originalCyclewaySurface = parseSurface(tags["cycleway:surface"])
         originalFootwaySurface = parseSurface(tags["footway:surface"])
 
-        selectableItems = Smoothness.entries.filter { it.osmValue != null }.map { it.asItem(originalSurface) }
+        selectableCyclewayItems = Smoothness.entries.filter { it.osmValue != null }.mapNotNull { it.asItem(originalCyclewaySurface) }
+        selectableFootwayItems = Smoothness.entries.filter { it.osmValue != null }.mapNotNull { it.asItem(originalFootwaySurface) }
+        selectableItems = Smoothness.entries.filter { it.osmValue != null }.mapNotNull { it.asItem(originalSurface) }
+
+        if (originalFootwaySurface == null && originalSurface != null)
+            selectableFootwayItems = selectableItems
+        if (originalCyclewaySurface == null && originalSurface != null)
+            selectableCyclewayItems = selectableItems
+        Log.d("Selectable",selectableFootwayItems.toString())
+        //TODO: Wenn weder selectableItems noch selectable*Items, dann die Auswahl ausgrauen. Geht noch nicht.
+        if (selectableFootwayItems.isEmpty())
+            binding.footway.selectButton.isGone = true
+        if (selectableCyclewayItems.isEmpty())
+            binding.cycleway.selectButton.isGone = true
     }
 
     private fun updateSelectedCell(cellBinding: ViewImageSelectBinding, item: Smoothness?, surface: Surface?) {
         cellBinding.selectTextView.isGone = item != null
         cellBinding.selectedCellView.isGone = item == null
-        if (item != null) {
-            ItemViewHolder(cellBinding.selectedCellView).bind(item.asItem(surface))
+
+        //TODO: Hier stürzt es noch ab, wenn man den Fall erwischt, dass nur ein *:surface gesetzt ist und kein generisches surface
+        if (item != null && item.asItem(surface) != null) {
+            ItemViewHolder(cellBinding.selectedCellView).bind(item.asItem(surface)!!)
         }
     }
 
@@ -137,7 +156,7 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
         LayoutInflater.from(requireContext()).inflate(cellLayoutId, binding.cycleway.selectedCellView, true)
         binding.cycleway.selectedCellView.children.first().background = null
         binding.cycleway.selectButton.setOnClickListener {
-            ImageListPickerDialog(requireContext(), selectableItems, cellLayoutId) { item ->
+            ImageListPickerDialog(requireContext(), selectableCyclewayItems, cellLayoutId) { item ->
                 if (item.value != selectedCyclewaySmoothness) {
                     selectedCyclewaySmoothness = item.value
                     checkIsFormComplete()
@@ -148,7 +167,7 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
         LayoutInflater.from(requireContext()).inflate(cellLayoutId, binding.footway.selectedCellView, true)
         binding.footway.selectedCellView.children.first().background = null
         binding.footway.selectButton.setOnClickListener {
-            ImageListPickerDialog(requireContext(), selectableItems, cellLayoutId) { item ->
+            ImageListPickerDialog(requireContext(), selectableFootwayItems, cellLayoutId) { item ->
                 if (item.value != selectedFootwaySmoothness) {
                     selectedFootwaySmoothness = item.value
                     checkIsFormComplete()
@@ -209,6 +228,7 @@ class SmoothnessOverlayForm : AbstractOverlayForm() {
     /* -------------------------------------- apply answer -------------------------------------- */
 
     override fun isFormComplete(): Boolean =
+        //TODO: Sonderfall: segregatedLayout aber eine Auswahl deaktiviert, weil weder surface noch *:surface gesetzt war. Dann sollte reichen, wenn ein Wert geändert wurde.
         if (isSegregatedLayout) {
             selectedCyclewaySmoothness != null && selectedFootwaySmoothness != null
         } else {
