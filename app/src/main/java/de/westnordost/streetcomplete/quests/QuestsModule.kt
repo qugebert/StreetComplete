@@ -74,6 +74,7 @@ import de.westnordost.streetcomplete.quests.crossing_markings.AddCrossingMarking
 import de.westnordost.streetcomplete.quests.crossing_signals.AddCrossingSignals
 import de.westnordost.streetcomplete.quests.cycleway.AddCycleway
 import de.westnordost.streetcomplete.quests.defibrillator.AddDefibrillatorLocation
+import de.westnordost.streetcomplete.quests.diet_type.AddGlutenFree
 import de.westnordost.streetcomplete.quests.diet_type.AddHalal
 import de.westnordost.streetcomplete.quests.diet_type.AddKosher
 import de.westnordost.streetcomplete.quests.diet_type.AddVegan
@@ -472,8 +473,6 @@ fun questTypeRegistry(
     // toilets
     118 to AddToiletAvailability(), // shown in OsmAnd descriptions
     119 to AddToiletsFee(), // used by OsmAnd in the object description
-    120 to AddBabyChangingTable(), // used by OsmAnd in the object description
-    121 to AddWheelchairAccessToiletsPart(),
     122 to AddWheelchairAccessToilets(), // used by wheelmap, OsmAnd, Organic Maps
 
     // shop
@@ -483,10 +482,15 @@ fun questTypeRegistry(
     126 to AddVegan(),
     127 to AddHalal(), // there are ~ 100 times more Muslims than Jews
     128 to AddKosher(),
+    175 to AddGlutenFree(),
     129 to AddWheelchairAccessBusiness(), // used by wheelmap, OsmAnd, Organic Maps
     130 to AddInternetAccess(), // used by OsmAnd
     131 to AddAcceptsCards(), // this will often involve going inside and near the till
     132 to AddAcceptsCash(),
+
+    // shop and others, but have to go inside
+    120 to AddBabyChangingTable(), // used by OsmAnd in the object description, have to go inside
+    121 to AddWheelchairAccessToiletsPart(), // have to go inside
 
     133 to AddFuelSelfService(),
     156 to CheckShopExistence(getFeature), // after opening hours and similar so they will be preferred if enabled
