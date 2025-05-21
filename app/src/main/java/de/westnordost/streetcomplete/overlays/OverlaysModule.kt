@@ -54,7 +54,7 @@ fun overlaysRegistry(
 
     0 to WayLitOverlay(),
     6 to SurfaceOverlay(),
-    9 to SmoothnessOverlay(),
+    10 to SmoothnessOverlay(),
     1 to SidewalkOverlay(),
     5 to CyclewayOverlay(getCountryInfoByLocation),
     2 to StreetParkingOverlay(),

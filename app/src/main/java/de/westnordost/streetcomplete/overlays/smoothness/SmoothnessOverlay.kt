@@ -80,7 +80,7 @@ class SmoothnessOverlay : Overlay {
         Smoothness.VERY_BAD -> Color.TEAL
         Smoothness.HORRIBLE -> Color.ORANGE
         Smoothness.VERY_HORRIBLE -> Color.LIME
-        Smoothness.IMPASSABLE -> Color.GRAY
+        Smoothness.IMPASSABLE -> Color.PURPLE
         Smoothness.UNKNOWN -> Color.BLACK
     }
 
