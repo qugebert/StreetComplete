@@ -34,13 +34,6 @@ fun Smoothness.applyTo(tags: Tags, prefix: String? = null, updateCheckDate: Bool
 
     val pre = if (prefix != null) "$prefix:" else ""
     val key = "${pre}smoothness"
-    val previousOsmValue = tags[key]
-    val hasChanged = previousOsmValue != null && previousOsmValue != osmValue
-
-    // on change need to remove keys associated with (old) surface
-    if (hasChanged) {
-        getKeysAssociatedWithSmoothness(pre).forEach { tags.remove(it) }
-    }
 
     // update surface + check date
     if (updateCheckDate) {
